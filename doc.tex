@@ -1,0 +1,490 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{alltt}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage[colorlinks,urlcolor=blue]{hyperref}
+\usepackage{listings} 
+\usepackage{color}
+
+
+
+\begin{document}
+\begin{titlepage}                                                         
+\newpage                                                                        
+\begin{center}                                                        
+ПРАВИТЕЛЬСТВО РОССИЙСКОЙ ФЕДЕРАЦИИ\linebreak
+Федеральное государственное автономное образовательное\linebreak
+учреждение высшего образования\\
+\vspace{2em}
+Национальный исследовательский университет\linebreak
+«Высшая школа экономики»\\
+\vspace{2em}
+Московский институт электроники и математики им. А. Н. Тихонова\\
+\vspace{2em}
+Кафедра компьютерной безопасности\\
+                                                                                                                                                                                                                                                        
+\vspace{5em}      
+                                                                              
+\Large Отчёт\linebreak
+по курсовой работе по дисциплине\linebreak
+“Программирование алгоритмов защиты информации”\linebreak             
+                                                                                                                                         
+\vspace{6em}                                                          
+\end{center}                                                                                                                            
+
+\begin{flushright}
+Выполнил студент группы СКБ 172\linebreak
+Синицын Константин Алексеевич\\
+\end{flushright}
+\vspace{\fill}       
+
+\begin{center}              
+Москва 2020
+\end{center}
+
+\end{titlepage}     
+
+
+\newpage
+{
+\hypersetup{linkcolor=black}
+\tableofcontents
+}
+\newpage
+
+
+\section{Введение}
+Данный отчет является результатом выполнения работы по созданию программной реализации алгоритма вычисления кратной точки на эллиптической кривой в форме квадрики Якоби. \\
+\\*
+\textbf{Задание:}
+\begin{itemize}
+\item Необходимо:
+	\begin{itemize}
+	\item Построить/выбрать точку $P$ на кривой;
+	\item Выбрать случайное значение $k$;
+	\item Реализовать алгоритм вычисления кратной точки $Q = [k]P$;
+	\item Провести тестирование программы.
+	\end{itemize}
+\item Для проведения тестирования необходимо:
+	\begin{itemize}
+	\item Проверить, что результирующая точка $Q$ лежит на кривой;
+	\item Проверить, что $[q]P = \mathcal{O}$, где $q$ - порядок группы точек;
+	\item Проверить, что $[q + 1]P = P$ и $[q - 1]P = - P$;
+	\item Для двух случайных $k_1, k_2$ проверить, что $[k_1]P + [k_2]P = [k_1 + k_2]P$.
+	\end{itemize}
+\end{itemize}
+\newpage
+
+
+\section{Теоретическая часть}
+\subsection{Квадрика Якоби}
+Эллиптическая кривая в форме квадрики Якоби имеет следующий вид:
+\begin{center}
+$Y^2 = eX^4 - 2dX^2Z^2 + Z^4,$
+\end{center}
+где $e, d$ - некоторые коэффициенты, $(X : Y : Z)$ - точка на данной кривой, заданная в проективных координатах; $e, d, X, Y, Z \in F_p$, где $p$ - простое и $p > 3$. \\
+\\*
+Кривая в краткой форме Вейерштрасса (афинная форма) имеет следующий вид:
+\begin{center}
+$y^2 \equiv x^3 - ax + b (mod p),$
+\end{center}
+где $a, b$ - параметры кривой в краткой форме Вейерштрасса, $(x, y)$ - точка на данной кривой, заданная в афинных координатах; $a, b, x, y \in F_p$ и $4a^3 + 27b^2 \neq 0 (mod p)$.\\
+\\*
+Для перехода от проективных координат $(X : Y : Z)$ к афинным координатам $(x, y)$ можно воспользоваться следующими формулами: \\
+\begin{equation*}
+\begin{cases}
+x = \frac{X}{Z}
+\\
+y = \frac{Y}{Z^2}
+\end{cases}
+\end{equation*}
+Чтобы найти параметры кривой в форме квадратики Якоби, необходимо воспользоваться переходами к ней от краткой формы Вейерштрасса:
+\begin{equation*}
+\begin{cases}
+(\theta, 0) \rightarrow (0 : -1 : 1)
+\\
+(x, y) \rightarrow (2(x - \theta) : (2x + \theta)(x - \theta)^2 - y^2 : y)
+\\
+\mathcal{O} \rightarrow (0 : 1 : 1)
+\end{cases}
+\end{equation*}
+Зная координаты точки второго порядка $(\theta, 0)$, принадлежащей кривой в краткой форме Вейерштрасса, можно найти значения параметров $e$ и $d$ согласно формулам $e = \frac{-(3\theta^2 + 4a)}{16}$, $d = \frac{3\theta}{4}$.\\
+\\*
+\textbf{Определение 1.} \textit{Нейтральный элемент - такая точка $\mathcal{O}$, что выполняются следующие свойства:}
+\begin{enumerate}
+\item $\mathcal{O} + \mathcal{O} = \mathcal{O}$
+\item $\mathcal{O} + P = P + \mathcal{O} - P,$ \textit{где} $P$ \textit{- точка на эллимптической кривой}
+\end{enumerate}
+Для эллиптической кривой в форме квадратики Якоби нейтральный элемент равен $(0 : 1 : 1)$. \\
+\\*
+\textbf{Определение 2.} \textit{Обратным элементом к точке} $(X : Y : Z)$ \textit{является} $(-X : Y : Z)$. \\
+\\*
+\textbf{Определение 3.} \textit{Порядком точки} $P$ \textit{называется такое минимальное число q, что} $[q]P = 0,$ \textit{а также выполняется следующее:}
+\begin{enumerate}
+\item $[q + 1]P = P$
+\item $[q - 1]P = - P$
+\end{enumerate}
+
+\subsection{Арифметические операции}
+Поскольку точки данной кривой принадлежат аддитивной абелевой группе, для них можно определить операции \textit{сложения} двух различных точек и \textit{удвоения} одной точки. Для кривой в форме квадрики Якоби удвоение является операцией сложения точки с самой собой, поэтому можно обойтись только операцией сложения.
+
+\subsubsection{Сложение}
+Для кривой в форме квадрики Якоби формулы сложения двух точек $(X_1 : Y_1 : Z_1) + (X_2 : Y_2 : Z_2) = (X_3 : Y_3 : Z_3)$ выглядят следующим образом:
+\begin{equation*}
+\begin{cases}
+X_3 = X_1Z_1Y_2 + Y_1X_2Z_2
+\\
+Y_3 = (Z_1^2Z_2^2 + eX_1^2X_2^2)(Y_1Y_2 - 2dX_1X_2Z_1Z_2) + 2eX_1X_2Z_1Z_2(X_1^2Z_2^2 + Z_1^2X_2^2)
+\\
+Z_3 = Z_1^2Z_2^2 - eX_1^2X_2^2
+\end{cases}
+\end{equation*}
+\newpage
+\underline{Алгоритм сложения двух точек:}\\*
+$T_1 \leftarrow X_1; T_2 \leftarrow Y_1; T_3 \leftarrow Z_1; T_4 \leftarrow X_2; T_5 \leftarrow Y_2; T_6 \leftarrow Z_2$ \\
+$T_7 \leftarrow T_1 \cdot T_3$ \hfill $(= X_1Z_1)$ \\*
+$T_7 \leftarrow T_2 + T_7$ \hfill $(= X_1Z_1 + Y_1)$ \\*
+$T_8 \leftarrow T_4 \cdot T_6$ \hfill $(= X_2Z_2)$ \\*
+$T_8 \leftarrow T_5 + T_8$ \hfill $(= X_2Z_2 + Y_2)$ \\*
+$T_2 \leftarrow T_2 \cdot T_5$ \hfill $(= Y_1Y_2)$ \\*
+$T_7 \leftarrow T_7 \cdot T_8$ \hfill $(= X_3 + Y_1Y_2 + X_1X_2Z_1Z_2)$ \\*
+$T_7 \leftarrow T_7 - T_2$ \hfill $(= X_3 + X_1X_2Z_1Z_2)$ \\*
+$T_5 \leftarrow T_1 \cdot T_4$ \hfill $(= X_1X_2)$ \\*
+$T_1 \leftarrow T_1 + T_3$ \hfill $(= X_1 + Z_1)$ \\*
+$T_8 \leftarrow T_3 \cdot T_6$ \hfill $(= Z_1Z_2)$ \\*
+$T_4 \leftarrow T_4 + T_6$ \hfill $(= X_2 + Z_2)$ \\*
+$T_6 \leftarrow T_5 \cdot T_8$ \hfill $(= X_1X_2Z_1Z_2)$ \\*
+$T_7 \leftarrow T_7 - T_6$ \hfill $(= X_3)$ \\*
+$T_1 \leftarrow T_1 \cdot T_4$ \hfill $(= X_1Z_2 + X_2Z_1 + X_1X_2 + Z_1Z_2)$ \\*
+$T_1 \leftarrow T_1 - T_5$ \hfill $(= X_1Z_2 + X_2Z_1 + Z_1Z_2)$ \\*
+$T_1 \leftarrow T_1 - T_8$ \hfill $(= X_1Z_2 + X_2Z_1)$ \\*
+$T_3 \leftarrow T_1 \cdot T_1$ \hfill $(= X_1^2Z_2^2 + X_2^2Z_1^2 + 2X_1X_2Z_1Z_2)$ \\*
+$T_6 \leftarrow T_6 + T_6$ \hfill $(= 2X_1X_2Z_1Z_2)$ \\*
+$T_3 \leftarrow T_3 - T_6$ \hfill $(= X_1^2Z_2^2 + X_2^2Z_1^2)$ \\*
+$T_4 \leftarrow e \cdot T_6$ \hfill $(= 2eX_1X_2Z_1Z_2)$ \\*
+$T_3 \leftarrow T_3 \cdot T_4$ \hfill $(= 2eX_1X_2Z_1Z_2(X_1^2Z_2^2 + X_2^2Z_1^2))$ \\*
+$T_4 \leftarrow d \cdot T_6$ \hfill $(= 2dX_1X_2Z_1Z_2)$ \\*
+$T_2 \leftarrow T_2 - T_4$ \hfill $(= Y_1Y_2 - 2dX_1X_2Z_1Z_2)$ \\*
+$T_4 \leftarrow T_8 \cdot T_8$ \hfill $(= Z_1^2Z_2^2)$ \\*
+$T_8 \leftarrow T_5 \cdot T_5$ \hfill $(= X_1^2X_2^2)$ \\*
+$T_8 \leftarrow e \cdot T_8$ \hfill $(= eX_1^2X_2^2)$ \\*
+$T_5 \leftarrow T_4 + T_8$ \hfill $(= Z_1^2Z_2^2 + eX_1^2X_2^2)$ \\*
+$T_2 \leftarrow T_2 \cdot T_5$ \hfill $(= (Z_1^2Z_2^2 + eX_1^2X_2^2)(Y_1Y_2 - 2dX_1X_2Z_1Z_2))$ \\*
+$T_2 \leftarrow T_2 + T_3$ \hfill $(= Y_3)$ \\*
+$T_5 \leftarrow T_4 - T_8$ \hfill $(= Z_3)$ \\*
+$X_3 \leftarrow T_7; Y_3 \leftarrow T_2; Z_3 \leftarrow T_5$
+
+\subsubsection{Нахождение кратной точки}
+\textbf{Определение 4.} \textit{Пусть}$P$\textit{ - точка на кривой, тогда} $[k]P = \underbrace{P + P + \dots + P}_{k раз}$ \textit{- кратная точка}, $k \in \mathbb{Z}, 0 \le k < q$. \\
+\\*
+Самый эффективный способ вычисления кратной точки это алгоритм "Лесенка Монтгомери".
+\begin{algorithm}
+\caption{Лесенка Монтгомери}
+\begin{algorithmic}[1]
+\STATE получить двоичное представление $k = (k_{n - 1}, \dots, k_0) = \sum^{n - 1}_{n = 0}k_i2^i$
+\STATE определить $Q = \mathcal{O}, R = P$
+\FOR{$i \leftarrow n - 1$ to 0}
+	\IF{$k_i = 0$}
+		\STATE вычислить $R = R + Q$ и $Q = [2]Q$;
+	\ENDIF
+	\IF{$k_i = 1$}
+		\STATE вычислить $Q = Q + R$ и $R = [2]R$;
+	\ENDIF
+\ENDFOR
+\STATE определить в качестве результата $Q$
+\end{algorithmic}
+\end{algorithm}
+\newpage
+
+
+\section{Работа с библиотекой libtommath. Описание функций.}
+Основным типом данных в данной библиотеке является тип \texttt{mp\_int}, предназначенный для хранения больших целых чисел.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init}}\texttt{(mp\_int * a)} - инициализирует структуру \texttt{mp\_int а} и выделяет память для хранения большого числа.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init\_multi}}\texttt{(mp\_int * mp, ..., NULL)} - инициализирует несколько структур \texttt{mp\_int} и выделяет память для хранения больших чисел. \\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init\_set}}\texttt{(mp\_int * a, mp\_digit b)} - инициализирует \texttt{mp\_int a} числом \texttt{mp\_digit b}. В качестве аргумента также можно передавать небольшие числа (не более \texttt{short int}).\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init\_copy}}\texttt{(mp\_int * a, mp\_int * b)} - инициализирует \texttt{mp\_int a} копией значения \texttt{mp\_int b}.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_clear}}\texttt{(mp\_int * a)} - освобождает память, использующуяся для хранения структуры \texttt{mp\_int a}.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_clear\_multi}}\texttt{(mp\_int *mp, \dots, NULL)} - освобождает память, использующиеся для хранения каждой из структур \texttt{mp\_int mp, \dots}\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_cmp}}\texttt{(mp\_int * a, mp\_int * b)} - производит знаковое сравнение \texttt{mp\_int a} и \texttt{mp\_int b}. Возвращает \texttt{MP\_EQ} в случае равенства, \texttt{MP\_GT}, если a > b и \texttt{MP\_LT}, если a < b. \\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_add}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c)} - записывает в \texttt{c} результат суммы \texttt{a + b}.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_sub}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c)} - записывает в \texttt{с} результат разности \texttt{a - b}.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_neg}}\texttt{(mp\_int * a, mp\_int * b)} - записывает в \texttt{b} значение \texttt{a} с противоположным знаком (\texttt{-a}).\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_div}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c, mp\_int * d)} - делит с остатком \texttt{a} на \texttt{b} и записывает частное в \texttt{c}, остаток в \texttt{d} (\texttt{a = bc + d)}). В случае ненадобности \texttt{mp\_int * c} или \texttt{mp\_int * d} может быть заменено на \texttt{NULL} (для получения, соответственно, только частного или только остатка). \\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_mul}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c)} - помещает результат умножения \texttt{a} на \texttt{b} в \texttt{c}.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_exptmod}}\texttt{(mp\_int * G, mp\_int * X, mp\_int * P, mp\_int * Y)} - возводит \texttt{G} в степень \texttt{Х} и помещает результат по модулю \texttt{Р} в \texttt{Y} (\texttt{$Y \equiv G X (mod P)$}).\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_to\_radix}}\texttt{(const mp\_int * a, char * str, size\_t maxlen, size\_t * written, int radix)} - помещает \texttt{mp\_int a} в строковом виде в \texttt{char str}. В \texttt{radix} указывается основание системы счисления (от 2 до 64), в \texttt{size\_t maxlen} - максимальный размер, который может занять число в \texttt{char str}, в \texttt{size\_t written} помещается размер реально записанного в \texttt{char str} числа.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_radix\_size}}\texttt{(mp\_int * a, int radix, int *size)} - помещает в \texttt{size} целое число – размер, необходимый для помещения \texttt{mp\_int а} в char. В \texttt{radix} указывается основание системы счисления (от 2 до 64). \\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_read\_radix}}\texttt{(mp\_int * a, char *str, int radix)} - считывает число в строковом виде из \texttt{char str} и помещает в \texttt{mp\_int a}. В \texttt{radix} указывается основание системы счисления (от 2 до 64).\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_prime\_random}}\texttt{(mp\_int *a, int t, int size, int bbs, ltm\_prime\_callback cb, void *dat)} - генерирует случайное простое число, превышающее $256^{size}$ и помещает его в \texttt{mp\_int a}. При этом число должно пройти \texttt{t} тестов. В аргументах \texttt{nt bbs, ltm\_prime\_callback cb, void *dat} указываются дополнительные флаги (не используется). Данная функция используется в программе для генерации случайного числа, поскольку библиотека Libtommath не содержит функций для генерации случайных чисел.\\ %вообще есть mp_rand, надо бы его чекнуть%.
+\\*
+
+
+\section{Описание основных функций и структур}
+Полные исходные коды можно найти в репозитории по ссылке \url{https://github.com/kasinitsyn/JacobiQuadric}. Там же можно найти информацию по установке библиотеки и запуску реализации. Ниже представлено описание основных функций и структур.
+\subsection{Основные структуры}
+Структура \texttt{Point} - точка в проективных координатах $(X, Y, Z)$. Каждая из координат имеет тип \texttt{mp\_int}.
+\lstset{language=C}
+\begin{lstlisting} 
+struct Point
+{
+    mp_int X;
+    mp_int Y;
+    mp_int Z;
+};
+\end{lstlisting}
+Структура \texttt{Parameters} содержит параметры, определенные стандартом (подробное описание параметров см. Исходные данные)
+\lstset{language=C}
+\begin{lstlisting} 
+struct Parameters
+{
+    mp_int p;
+    mp_int q;
+
+    mp_int a;
+    mp_int b;
+
+    mp_int x_base;
+    mp_int y_base;
+
+    mp_int theta;
+};
+\end{lstlisting}
+Стуктура \texttt{JacobiQuadric} содержит параметры квадрики Якоби: $p$  -характеристика поля, $e, d$ - параметры кривой, $X, Y, Z$ - координаты порождающего элемента.
+\lstset{language=C}
+\begin{lstlisting} 
+struct JacobiQuadric
+{
+    mp_int p;
+    mp_int e;
+    mp_int d;
+
+    mp_int X;
+    mp_int Y;
+    mp_int Z;
+};
+\end{lstlisting} 
+\subsection{Основные функции}
+\subsubsection{Функции, обеспечивающие арифметику по модулю числа}
+В виду отсутствия в библиотеке Libtommath необходимых для математики эллиптических кривых функций, осуществялющих арифметику по модулю числа, были написаны функции для решения этой проблемы. Функции стилистически оформлены как функции библиотеки.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_add\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c, mp\_int * mod)} - записывает в \texttt{c} результат суммы \texttt{a + b} по модулю числа \texttt{p}.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_sub\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c, mp\_int * mod)} - записывает в \texttt{c} результат разности \texttt{a - b} по модулю числа \texttt{p}.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_mul\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c, mp\_int * mod)} - записывает в \texttt{c} результат произведения \texttt{a * b} по модулю числа \texttt{p}.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_neg\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * mod)} - записывает в \texttt{b} значение \texttt{a} с противоположным знаком (\texttt{-a}) по по модулю числа \texttt{p}.\\
+
+\subsubsection{Функции инициализации основных структур}
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{InitPoint}}\texttt{(struct Point * P, mp\_int * x, mp\_int * y, mp\_int * z)} - инициализация точки \texttt{P} с проективными координатами \texttt{x, y, z}.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{InitParameters}}\texttt{(struct Parameters * Param, mp\_int * p, mp\_int * q, mp\_int * a, mp\_int * b, mp\_int * x\_base, mp\_int * y\_base, mp\_int * theta)} - инициализация структуры \texttt{Param} с параметрами.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{InitJacobiQuadric}}\texttt{(struct JacobiQuadric * JQ, struct Parameters * Param)} - инициализация структуры \texttt{JQ} с параметрами кривой.\\ 
+
+\subsubsection{Функции освобождения памяти, использующейся для хранения основных структур}
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{ClearPoint}}\texttt{(struct Point * P)} - освобождение памяти, использовавшейся для хранения точки \texttt{P}\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{ClearParameters}}\texttt{(struct Parameters * Param)} - освобождение памяти, использовавшейся для хранения параметров в струкрутре \texttt{Param}.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{ClearJacobiQuadric}}\texttt{(struct JacobiQuadric * JQ)} - освобождение памяти, использовавшейся для хранения параметров кривой Якоби в структуре \texttt{JQ}.\\
+
+\subsubsection{Функции для вывода координат точки на экран}
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{PrintPoint}}\texttt{(struct Point * P)} - вывести значения проективных координат точки \texttt{P} на экран.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{PrintPointAffine}}\texttt{(struct Point * P, struct JacobiQuadric * JQ)} - вывести значения афинных координат точки \texttt{P} на экран. Структура \texttt{JQ} - данная кривая.\\
+
+\subsubsection{Основные функции}
+\textcolor{red}{\texttt{bool}} \textcolor{blue}{\texttt{IsPointOnCurve}}\texttt{(struct Point * P, struct JacobiQuadric * JQ)} - проверка находится ли данная точка \texttt{P} на данной кривой \texttt{JQ}. Возвращает \texttt{true}, если точка находится на кривой и \texttt{false} в противном случае.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{Addition}}\texttt{(struct Point * P1, struct Point * P2, struct Point * P3, struct JacobiQuadric * JQ)} - сложение двух точек \texttt{P1 + P2}, результат записывается в третью точку \texttt{P3}. Структура \texttt{JQ} - данная кривая.\\
+\\*
+\textcolor{red}{\texttt{bool}} \textcolor{blue}{\texttt{ArePointsEqual}}\texttt{(struct Point * P1, struct Point * P2, struct JacobiQuadric * JQ)} - проверка равенства двух точек \texttt{P1} и \texttt{P2} на кривой \texttt{JQ}.\\
+\\*
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{MontgomeryLadder}}\texttt{(struct Point * P, mp\_int * k, struct Point * Q, struct JacobiQuadric * JQ)} - реализация алгоритма "лесенка Монтгомери", где \texttt{P} - точка на кривой, \texttt{k} - степень точки, \texttt{Q} - результирующая точка $Q = [k]P$, \texttt{JQ} - данная кривая.\\
+\\*
+
+
+\section{Тестирование}
+\subsection{Исходные данные}
+Параметры для проверки работоспособности реализации и правильности ее выполнения были взяты из документа \textit{«Рекомендации по стандартизации. Параметры эллиптических кривых для криптографических алгоритмов и протоколов. Р 50.1.114 – 2016»}. Для проверки из предложенных наборов параметров был взят набор параметров \textbf{id-tc26-gost3410-2012-256-paramSetA}, содержащий следующие значения:\\
+\\*
+p = $115792089237316195423570985008687907853269984665640564039457584007913129639319_{10}$
+a = $87789765485885808793369751294406841171614589925193456909855962166505018127157_{10}$
+b = $18713751737015403763890503457318596560459867796169830279162511461744901002515_{10}$
+q = $28948022309329048855892746252171976963338560298092253442512153408785530358887_{10}$
+x = $65987350182584560790308640619586834712105545126269759365406768962453298326056_{10}$
+y = $22855189202984962870421402504110399293152235382908105741749987405721320435292_{10}$\\
+\\*
+Где:\\*
+p - характеристика простого поля, над которым определятся эллиптическая кривая; \\*
+a, b - параметры эллиптической кривой в форме Вейерштрасса (параметр $b$ в реализации не используется); \\*
+q - порядок подгруппы простого порядка группы точек эллиптической кривой; \\*
+x, y - координаты порождающего элемента в краткой форме Вейерштрасса (в реализации обозначаются как x\_base, y\_base).\\
+\\*
+В документе значения параметров приведены в шестнадцатиричной системе счисления. Для перевода параметров в десятичную систему использовалась программа Wolfram Mathematica. Также, с помощью данной  программы были вычислена х-координата точки $(\theta, 0)$ второго порядка в форме Вейерштрасса (значение $\theta$): \\
+\\* 
+$\theta = 454069018412434321972378083527459607666454479745512801572100703902391945898_{10}$\\
+\\*
+Ниже приведен фрагмент кода Wolfram Mathematica и результат выполнения вычислений:
+\begin{center}
+\includegraphics [width=1.0\textwidth]{pic1.png}\\
+\includegraphics [width=0.85\textwidth]{pic2.png}\\
+\end{center}
+
+
+
+\subsection{Результаты}
+\subsubsection{Проверка на утечки памяти}
+Вначале была осуществлена проверка утечек памяти с помощью средства поиска ошибок работы с памятью Valgrind. \\
+Команда: valgrind --leak-check=full ./JacobiQuadric\\*
+Вывод:\\*
+==1756==  HEAP SUMMARY:\\*
+==1756==     in use at exit: 0 bytes in 0 blocks\\*
+==1756==   total heap usage: 489,445 allocs, 489,445 frees, 55,656,115 bytes allocated\\*
+==1756== \\*
+==1756== All heap blocks were freed -- no leaks are possible\\*
+==1756== \\*
+==1756== For counts of detected and suppressed errors, rerun with: -v\\*
+==1756== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)\\
+\subsubsection{Тестирование реализации}
+Затем было проведено тестирование самой реализации:\\*
+Команда: ./JacobiQuadric\\*
+Вывод:\\*
+Посчитанные параметры квадрики Якоби:\\*
+d = 58236596382467423453264776066989548632384833192629416620907867531883358779083\\*
+e = 21881292613901449512659201470451780075363042554712173057987834765447108787084\\*
+X\_base = 15274473091028057513101540063430842355608196627407929088211752509188683120997\\*
+Y\_base = 70639478069546534592066422814913955506998300889114271757947051176576672450210\\*
+Z\_base = 22855189202984962870421402504110399293152235382908105741749987405721320435292\\
+\\*
+ТЕСТ 1: ПРОВЕРКА ПРИНАДЛЕЖНОСТИ НЕЙТРАЛЬНОГО ЭЛЕМЕНТА\\*
+Точка в проективных координатах:\\*
+X = 0\\*
+Y = 1\\*
+Z = 1\\*
+Точка в афинных координатах:\\*
+x = 0\\*
+y = 1\\*
+Нейтральный элемент Е принадлежит кривой\\
+\\*
+ТЕСТ 2: ПОРОЖДАЮЩИЙ ЭЛЕМЕНТ В АФИННЫХ КООРДИНАТАХ\\*
+Точка в афинных координатах:\\*
+x = 26\\*
+y = 32588803023257230788452318859724590706198019287541469357859214741485052675122\\*
+Порождающий элемент P\_base принадлежит кривой\\
+\\*
+ТECT 3: E + P\_base = P\_base?\\*
+Точка в проективных координатах:\\*
+X = 46006328807261240983066223367402584890441940889817085927906907131943988570069\\*
+Y = 55579995469928774719018320141672621810816086559469103791209555426079733213871\\*
+Z = 50758435016066899640090271479344983510631222008148588090843858893038015946253\\*
+Точка в афинных координатах:\\*
+x = 26\\*
+y = 32588803023257230788452318859724590706198019287541469357859214741485052675122\\*
+Точка Е + P\_base принадлежит кривой\\*
+Точки E+P\_base и P\_base равны\\
+\\*
+ТECT 4: Принадлежит ли точка P2 = (5 : 1 : 4) кривой\\*
+Точка в афинных координатах:\\*
+x = 28948022309329048855892746252171976963317496166410141009864396001978282409831\\*
+y = 65133050195990359925758679067386948167464366374422817272194891004451135422117\\*
+Точка (5 : 1 : 4) не принадлежит кривой\\
+\\*
+ТECT 5: [q]P = E?\\*
+Точка в проективных координатах:\\*
+X = 0\\*
+Y = 40178936660781546849967672518756049964755243454469907618687078886735047096265\\*
+Z = 57742264586188110633053061231704778952292277256767593810644170837071465729572\\*
+Точка в афинных координатах:\\*
+x = 0\\*
+y = 1\\*
+Точки [q]P и E равны\\
+\\*
+ТECT 6: [q+1]P = P и [q-1] = -P\\*
+Точка в афинных координатах:\\*
+x = 115792089237316195423570985008687907853269984665640564039457584007913129639293\\*
+y = 32588803023257230788452318859724590706198019287541469357859214741485052675122\\*
+Точка в афинных координатах:\\*
+x = 115792089237316195423570985008687907853269984665640564039457584007913129639293\\*
+y = 32588803023257230788452318859724590706198019287541469357859214741485052675122\\*
+Точки [q - 1]P и -P равны\\*
+Точка в афинных координатах:\\*
+x = 26\\*
+y = 32588803023257230788452318859724590706198019287541469357859214741485052675122\\*
+Точка в афинных координатах:\\*
+x = 26\\*
+y = 32588803023257230788452318859724590706198019287541469357859214741485052675122\\*
+Точки [q + 1]P и P равны\\
+\\*
+ТECT 7: Вычисление [k]P при k = 100\\*
+Точка в афинных координатах:\\*
+x = 46114831014247229923266331647927557586696495636126505757008735063481431609683\\*
+y = 38376220474406473655225685664497454497247526062573712862044892681609942213050\\*
+Точка [k]P принадлежит кривой\\
+\\*
+ТЕСТ 8: Вычисление [k]P для случайного k из диапазона [0, q)\\*
+k = 991954433999604731829632709224396598341591234772024487906631\\*
+Точка в афинных координатах:\\*
+x = 50779116323969119300621785808242934425388155432437577476919529444328576423118\\*
+y = 94020197051731514972631394841409410785510879144286959132168853193003725895704\\*
+Точка [k]P принадлежит кривой\\
+\\*
+ТЕСТ 9: [k1]P + [k2]P = [k1 + k2]P?\\*
+k1 = 1084845348725810821418535502021\\*
+k2 = 795405475617922960716810407137\\*
+k1 + k2 = 1880250824343733782135345909158\\*
+Точка в афинных координатах:\\*
+x = 36783066602330481256214373320726812578572207207168637666900660686517300314330\\*
+y = 52106396355070439400592651537488559251130145451034852674912273346313496501149\\*
+Точка [k1]P принадлежит кривой\\*
+Точка в афинных координатах:\\*
+x = 23653286548373740116138831789119419465516319104618009133532289868355943583259\\*
+y = 6521473322108346065594065622514635457973368003972073332546242861921339483508\\*
+Точка [k2]P принадлежит кривой\\*
+Точка в афинных координатах:\\*
+x = 100174933671734223955453094649162785325397815042489168097357339866005748107089\\*
+y = 84966962613761404393860727171805411782744711102320690988699985888828907160639\\*
+Точка [k1 + k2]P принадлежит кривой\\*
+Точки [k1]P + [k2]P и [k1 + k2]P равны\\
+\\*
+ВСЕ ТЕСТЫ УСПЕШНО ПРОЙДЕНЫ\\
+\\*
+
+
+
+\section{Использованная литература}
+\begin{enumerate}
+\item Нестеренко А. Ю. – Курс лекций «Методы программной реализации
+СКЗИ»;
+\item O. Billet, M. Joye. – «The Jacobi model of an elliptic curve and side-channel
+analysis, proceedings of AAECC-15, Lecture Notes in Computer Science» \url{https://eprint.iacr.org/2002/125.pdf};
+\item «Рекомендации по стандартизации. Параметры эллиптических кривых
+для криптографических алгоритмов и протоколов. Р 50.1.114 – 2016»;
+\item Документация библиотеки libtommath «LibTomMath User Manual» \url{https://github.com/libtom/libtommath}.
+\end{enumerate}
+
+
+\end{document}
