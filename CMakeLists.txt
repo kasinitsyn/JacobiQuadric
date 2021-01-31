@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(pazi1-2)
+project(JacobiQuadric)
 add_executable(${PROJECT_NAME} "main.c" "curve.c" "curve.h")
 
 find_package(PkgConfig REQUIRED)

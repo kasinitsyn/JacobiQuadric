@@ -54,27 +54,37 @@ int main()
     // ТЕСТИРОВАНИЕ //
     bool ALL_TESTS_ARE_CORRECT = true;
 
-    // ТЕСТ: ПРОВЕРКА ПРИНАДЛЕЖНОСТИ НЕЙТРАЛЬНОГО ЭЛЕМЕНТА
-    printf("\nТЕСТ: ПРОВЕРКА ПРИНАДЛЕЖНОСТИ НЕЙТРАЛЬНОГО ЭЛЕМЕНТА\n");
+    // ТЕСТ 1: ПРОВЕРКА ПРИНАДЛЕЖНОСТИ НЕЙТРАЛЬНОГО ЭЛЕМЕНТА
+    printf("\nТЕСТ 1: ПРОВЕРКА ПРИНАДЛЕЖНОСТИ НЕЙТРАЛЬНОГО ЭЛЕМЕНТА\n");
     PrintPoint(&E);
     PrintPointAffine(&E, &Quadric);
-    if (!IsPointOnCurve(&E, &Quadric))
+    if (IsPointOnCurve(&E, &Quadric))
     {
+        printf("Нейтральный элемент Е принадлежит кривой\n");
+    }
+    else
+    {
+        printf("Нейтральный элемент Е не принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
     }
 
 
     // ТЕСТ 2: ПОРОЖДАЮЩИЙ ЭЛЕМЕНТ В АФИННЫХ КООРДИНАТАХ
-    printf("\nПОРОЖДАЮЩИЙ ЭЛЕМЕНТ В АФИННЫХ КООРДИНАТАХ\n");
+    printf("\nТЕСТ 2: ПОРОЖДАЮЩИЙ ЭЛЕМЕНТ В АФИННЫХ КООРДИНАТАХ\n");
     PrintPointAffine(&P_base, &Quadric);
-    if (!IsPointOnCurve(&P_base, &Quadric))
+    if (IsPointOnCurve(&P_base, &Quadric))
     {
+        printf("Порождающий элемент P_base принадлежит кривой\n");
+    }
+    else
+    {
+        printf("Порождающий элемент P_base не принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
     }
 
 
-    // ТECT 3: E+P_base = P_base?
-    printf("\nТECT 3: E+P_base = P_base?\n");
+    // ТECT 3: E + P_base = P_base?
+    printf("\nТECT 3: E + P_base = P_base?\n");
     struct Point SumPoint;
     mp_int spx, spy, spz;
     mp_init_multi(&spx, &spy, &spz, NULL);
@@ -83,8 +93,13 @@ int main()
 
     PrintPoint(&SumPoint);
     PrintPointAffine(&SumPoint, &Quadric);
-    if (!IsPointOnCurve(&SumPoint, &Quadric))
+    if (IsPointOnCurve(&SumPoint, &Quadric))
     {
+        printf("Точка Е + P_base принадлежит кривой\n");
+    }
+    else
+    {
+        printf("Точка Е + P_base не принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
     }
 
@@ -99,8 +114,8 @@ int main()
     }
 
 
-    // ТECT 4: Принадлежит ли точка P2=(5:1:4) кривой
-    printf("\nТECT 4: Принадлежит ли точка P2=(5:1:4) кривой\n");
+    // ТECT 4: Принадлежит ли точка P2 = (5 : 1 : 4) кривой
+    printf("\nТECT 4: Принадлежит ли точка P2 = (5 : 1 : 4) кривой\n");
     struct Point P2;
     mp_int p2x, p2y, p2z;
     mp_init_set(&p2x, 5);
@@ -111,12 +126,17 @@ int main()
     PrintPointAffine(&P2, &Quadric);
     if (IsPointOnCurve(&P2, &Quadric))
     {
+        printf("Точка (5 : 1 : 4) принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
+    }
+    else
+    {
+        printf("Точка (5 : 1 : 4) не принадлежит кривой\n");
     }
 
 
-    // ТECT 5: qP = E?
-    printf("\nТECT 5: qP = E?\n");
+    // ТECT 5: [q]P = E?
+    printf("\nТECT 5: [q]P = E?\n");
     struct Point Q;
     mp_int qx, qy, qz;
     mp_init_multi(&qx, &qy, &qz, NULL);
@@ -180,7 +200,6 @@ int main()
         ALL_TESTS_ARE_CORRECT = false;
     }
 
-
     PrintPointAffine(&Q2, &Quadric);
     PrintPointAffine(&P_base, &Quadric);
     if (ArePointsEqual(&Q2, &P_base, &Quadric))
@@ -194,8 +213,8 @@ int main()
     }
 
 
-    // ТECT 7: Вычисление [k]P при k = 100; P = P_base?
-    printf("\nТECT 7: Вычисление [k]P при k = 100; P = P_base?\n");
+    // ТECT 7: Вычисление [k]P при k = 100
+    printf("\nТECT 7: Вычисление [k]P при k = 100\n");
     struct Point kP;
     mp_int kpx, kpy, kpz, k;
     mp_init_set(&k, 100);
@@ -204,8 +223,13 @@ int main()
     MontgomeryLadder(&P_base, &k, &kP, &Quadric);
 
     PrintPointAffine(&kP, &Quadric);
-    if (!IsPointOnCurve(&kP, &Quadric))
+    if (IsPointOnCurve(&kP, &Quadric))
     {
+        printf("Точка [k]P принадлежит кривой\n");
+    }
+    else
+    {
+        printf("Точка [k]P не принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
     }
 
@@ -217,8 +241,13 @@ int main()
     printf("k = %s\n", answer);
     MontgomeryLadder(&P_base, &k, &kP, &Quadric);
     PrintPointAffine(&kP, &Quadric);
-    if (!IsPointOnCurve(&kP, &Quadric))
+    if (IsPointOnCurve(&kP, &Quadric))
     {
+        printf("Точка [k]P принадлежит кривой\n");
+    }
+    else
+    {
+        printf("Точка [k]P не принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
     }
 
@@ -247,8 +276,13 @@ int main()
 
     MontgomeryLadder(&P_base, &k1, &k1P, &Quadric);
     PrintPointAffine(&k1P, &Quadric);
-    if (!IsPointOnCurve(&k1P, &Quadric))
+    if (IsPointOnCurve(&k1P, &Quadric))
     {
+        printf("Точка [k1]P принадлежит кривой\n");
+    }
+    else
+    {
+        printf("Точка [k1]P не принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
     }
 
@@ -259,15 +293,25 @@ int main()
 
     MontgomeryLadder(&P_base, &k2, &k2P, &Quadric);
     PrintPointAffine(&k2P, &Quadric);
-    if (!IsPointOnCurve(&k2P, &Quadric))
+    if (IsPointOnCurve(&k2P, &Quadric))
     {
+        printf("Точка [k2]P принадлежит кривой\n");
+    }
+    else
+    {
+        printf("Точка [k2]P не принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
     }
 
     MontgomeryLadder(&P_base, &k1k2, &kP, &Quadric);
     PrintPointAffine(&kP, &Quadric);
-    if (!IsPointOnCurve(&kP, &Quadric))
+    if (IsPointOnCurve(&kP, &Quadric))
     {
+        printf("Точка [k1 + k2]P принадлежит кривой\n");
+    }
+    else
+    {
+        printf("Точка [k1 + k2]P не принадлежит кривой\n");
         ALL_TESTS_ARE_CORRECT = false;
     }
 

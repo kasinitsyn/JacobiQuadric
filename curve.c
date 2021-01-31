@@ -254,12 +254,10 @@ bool IsPointOnCurve(struct Point * P, struct JacobiQuadric * JQ)
     if (mp_cmp(&buf2, &buf3) == MP_EQ)
     {
         IsOnCurve = true;
-        printf("Точка принадлежит кривой\n");
     }
     else
     {
         IsOnCurve = false;
-        printf("Точка не принадлежит кривой\n");
     }
 
     mp_clear_multi(&buf1, &buf2, &buf3, NULL);
