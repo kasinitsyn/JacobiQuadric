@@ -391,8 +391,8 @@ void MontgomeryLadder(struct Point * P, mp_int * k, struct Point * RES, struct J
         }
         else
         {
-            Addition(&R, &Q, &R, JQ); // R = R + Q
-            Addition(&Q, &Q, &Q, JQ); // Q = Q + Q
+            Addition(&R, &Q, &R, JQ);   // R = R + Q
+            Addition(&Q, &Q, &Q, JQ);   // Q = Q + Q
         }
     }
 

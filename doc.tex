@@ -113,7 +113,7 @@ y = \frac{Y}{Z^2}
 \mathcal{O} \rightarrow (0 : 1 : 1)
 \end{cases}
 \end{equation*}
-Зная координаты точки второго порядка $(\theta, 0)$, принадлежащей кривой в краткой форме Вейерштрасса, можно найти значения параметров $e$ и $d$ согласно формулам $e = \frac{-(3\theta^2 + 4a)}{16}$, $d = \frac{3\theta}{4}$.\\
+Здесь $\theta$ - координата точки второго порядка $(\theta, 0)$, принадлежащей кривой в краткой форме Вейерштрасса. Зная значение $\theta$, можно найти значения параметров $e$ и $d$ согласно формулам $e = \frac{-(3\theta^2 + 4a)}{16}$, $d = \frac{3\theta}{4}$.\\
 \\*
 \textbf{Определение 1.} \textit{Нейтральный элемент - такая точка $\mathcal{O}$, что выполняются следующие свойства:}
 \begin{enumerate}
@@ -144,7 +144,7 @@ Y_3 = (Z_1^2Z_2^2 + eX_1^2X_2^2)(Y_1Y_2 - 2dX_1X_2Z_1Z_2) + 2eX_1X_2Z_1Z_2(X_1^2
 Z_3 = Z_1^2Z_2^2 - eX_1^2X_2^2
 \end{cases}
 \end{equation*}
-\newpage
+\\*
 \underline{Алгоритм сложения двух точек:}\\*
 $T_1 \leftarrow X_1; T_2 \leftarrow Y_1; T_3 \leftarrow Z_1; T_4 \leftarrow X_2; T_5 \leftarrow Y_2; T_6 \leftarrow Z_2$ \\
 $T_7 \leftarrow T_1 \cdot T_3$ \hfill $(= X_1Z_1)$ \\*
@@ -203,21 +203,21 @@ $X_3 \leftarrow T_7; Y_3 \leftarrow T_2; Z_3 \leftarrow T_5$
 
 
 \section{Работа с библиотекой libtommath. Описание функций.}
-Основным типом данных в данной библиотеке является тип \texttt{mp\_int}, предназначенный для хранения больших целых чисел.\\
+Основным типом данных в данной библиотеке является тип \texttt{mp\_int}, предназначенный для хранения больших целых чисел. При написании реализации были использованы следующие функции библиотеки:\\
 \\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init}}\texttt{(mp\_int * a)} - инициализирует структуру \texttt{mp\_int а} и выделяет память для хранения большого числа.\\
 \\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init\_multi}}\texttt{(mp\_int * mp, ..., NULL)} - инициализирует несколько структур \texttt{mp\_int} и выделяет память для хранения больших чисел. \\
 \\*
-\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init\_set}}\texttt{(mp\_int * a, mp\_digit b)} - инициализирует \texttt{mp\_int a} числом \texttt{mp\_digit b}. В качестве аргумента также можно передавать небольшие числа (не более \texttt{short int}).\\
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init\_set}}\texttt{(mp\_int * a, mp\_digit b)} - выделяет память и инициализирует \texttt{mp\_int a} однозначным числом \texttt{mp\_digit b}. В качестве аргумента также можно передавать небольшие числа (не более \texttt{short int}).\\
 \\*
-\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init\_copy}}\texttt{(mp\_int * a, mp\_int * b)} - инициализирует \texttt{mp\_int a} копией значения \texttt{mp\_int b}.\\
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_init\_copy}}\texttt{(mp\_int * a, mp\_int * b)} - выделяет память и инициализирует \texttt{mp\_int a} копией значения \texttt{mp\_int b}.\\
 \\*
 \textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_clear}}\texttt{(mp\_int * a)} - освобождает память, использующуяся для хранения структуры \texttt{mp\_int a}.\\
 \\*
-\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_clear\_multi}}\texttt{(mp\_int *mp, \dots, NULL)} - освобождает память, использующиеся для хранения каждой из структур \texttt{mp\_int mp, \dots}\\
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_clear\_multi}}\texttt{(mp\_int *mp, \dots, NULL)} - освобождает память, использующиеся для хранения каждой из структур \texttt{mp\_int}.\\
 \\*
-\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_cmp}}\texttt{(mp\_int * a, mp\_int * b)} - производит знаковое сравнение \texttt{mp\_int a} и \texttt{mp\_int b}. Возвращает \texttt{MP\_EQ} в случае равенства, \texttt{MP\_GT}, если a > b и \texttt{MP\_LT}, если a < b. \\
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_cmp}}\texttt{(mp\_int * a, mp\_int * b)} - производит знаковое сравнение чисел \texttt{mp\_int a} и \texttt{mp\_int b}. Возвращает \texttt{MP\_EQ} в случае равенства, \texttt{MP\_GT}, если a > b и \texttt{MP\_LT}, если a < b. \\
 \\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_add}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c)} - записывает в \texttt{c} результат суммы \texttt{a + b}.\\
 \\*
@@ -237,12 +237,12 @@ $X_3 \leftarrow T_7; Y_3 \leftarrow T_2; Z_3 \leftarrow T_5$
 \\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_read\_radix}}\texttt{(mp\_int * a, char *str, int radix)} - считывает число в строковом виде из \texttt{char str} и помещает в \texttt{mp\_int a}. В \texttt{radix} указывается основание системы счисления (от 2 до 64).\\
 \\*
-\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_prime\_random}}\texttt{(mp\_int *a, int t, int size, int bbs, ltm\_prime\_callback cb, void *dat)} - генерирует случайное простое число, превышающее $256^{size}$ и помещает его в \texttt{mp\_int a}. При этом число должно пройти \texttt{t} тестов. В аргументах \texttt{nt bbs, ltm\_prime\_callback cb, void *dat} указываются дополнительные флаги (не используется). Данная функция используется в программе для генерации случайного числа, поскольку библиотека Libtommath не содержит функций для генерации случайных чисел.\\ %вообще есть mp_rand, надо бы его чекнуть%.
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_prime\_random}}\texttt{(mp\_int * a, int t, int size, int bbs, ltm\_prime\_callback cb, void * dat)} - генерирует случайное простое число, превышающее $256^{size}$ и помещает его в \texttt{mp\_int a}. При этом число должно пройти \texttt{t} тестов. В аргументах \texttt{int bbs, ltm\_prime\_callback cb, void * dat} указываются дополнительные флаги (не используется). Данная функция используется в программе для генерации случайного числа, поскольку библиотека Libtommath не содержит функций для генерации случайных чисел.\\ 
 \\*
 
 
 \section{Описание основных функций и структур}
-Полные исходные коды можно найти в репозитории по ссылке \url{https://github.com/kasinitsyn/JacobiQuadric}. Там же можно найти информацию по установке библиотеки и запуску реализации. Ниже представлено описание основных функций и структур.
+Полные исходные коды можно найти в репозитории по ссылке \url{https://github.com/kasinitsyn/JacobiQuadric}. Ниже представлено описание основных функций и структур.
 \subsection{Основные структуры}
 Структура \texttt{Point} - точка в проективных координатах $(X, Y, Z)$. Каждая из координат имеет тип \texttt{mp\_int}.
 \lstset{language=C}
@@ -271,7 +271,7 @@ struct Parameters
     mp_int theta;
 };
 \end{lstlisting}
-Стуктура \texttt{JacobiQuadric} содержит параметры квадрики Якоби: $p$  -характеристика поля, $e, d$ - параметры кривой, $X, Y, Z$ - координаты порождающего элемента.
+Стуктура \texttt{JacobiQuadric} содержит параметры квадрики Якоби: $p$ - характеристика поля, $e, d$ - параметры кривой, $X, Y, Z$ - координаты порождающего элемента.
 \lstset{language=C}
 \begin{lstlisting} 
 struct JacobiQuadric
@@ -287,7 +287,7 @@ struct JacobiQuadric
 \end{lstlisting} 
 \subsection{Основные функции}
 \subsubsection{Функции, обеспечивающие арифметику по модулю числа}
-В виду отсутствия в библиотеке Libtommath необходимых для математики эллиптических кривых функций, осуществялющих арифметику по модулю числа, были написаны функции для решения этой проблемы. Функции стилистически оформлены как функции библиотеки.\\
+В виду отсутствия в библиотеке Libtommath необходимых для математики эллиптических кривых функций, осуществляющих арифметику по модулю числа, в ходе выполнения данной работы были написаны соответствующие функции. Функции стилистически оформлены как функции библиотеки.\\
 \\*
 \textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_add\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c, mp\_int * mod)} - записывает в \texttt{c} результат суммы \texttt{a + b} по модулю числа \texttt{p}.\\
 \\*
@@ -305,7 +305,7 @@ struct JacobiQuadric
 \textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{InitJacobiQuadric}}\texttt{(struct JacobiQuadric * JQ, struct Parameters * Param)} - инициализация структуры \texttt{JQ} с параметрами кривой.\\ 
 
 \subsubsection{Функции освобождения памяти, использующейся для хранения основных структур}
-\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{ClearPoint}}\texttt{(struct Point * P)} - освобождение памяти, использовавшейся для хранения точки \texttt{P}\\
+\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{ClearPoint}}\texttt{(struct Point * P)} - освобождение памяти, использовавшейся для хранения точки в структуре \texttt{P}.\\
 \\*
 \textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{ClearParameters}}\texttt{(struct Parameters * Param)} - освобождение памяти, использовавшейся для хранения параметров в струкрутре \texttt{Param}.\\
 \\*
@@ -328,8 +328,17 @@ struct JacobiQuadric
 
 
 \section{Тестирование}
+\subsection{Установка и запуск реализации}
+Для установки библиотеки Libtommath следует воспользоваться официальной инструкцией по установке, приведенной в документации к библиотеке \url{https://github.com/libtom/libtommath}. \\
+\\*
+Для установки и запуска реализации следует выполнить следующие команды в командной строке из папки с проектом:
+\begin{enumerate}
+\item cmake CMakeLists.txt
+\item make
+\item ./JacodiQuadric
+\end{enumerate}
 \subsection{Исходные данные}
-Параметры для проверки работоспособности реализации и правильности ее выполнения были взяты из документа \textit{«Рекомендации по стандартизации. Параметры эллиптических кривых для криптографических алгоритмов и протоколов. Р 50.1.114 – 2016»}. Для проверки из предложенных наборов параметров был взят набор параметров \textbf{id-tc26-gost3410-2012-256-paramSetA}, содержащий следующие значения:\\
+Параметры для проверки работоспособности реализации и правильности ее выполнения были взяты из документа \textit{«Рекомендации по стандартизации. Параметры эллиптических кривых для криптографических алгоритмов и протоколов. Р 50.1.114 – 2016»}. Для проверки из предложенных наборов параметров был взят набор параметров \textbf{id-tc26-gost-3410-2012-256-paramSetA}, содержащий следующие значения:\\
 \\*
 p = $115792089237316195423570985008687907853269984665640564039457584007913129639319_{10}$
 a = $87789765485885808793369751294406841171614589925193456909855962166505018127157_{10}$
@@ -341,7 +350,7 @@ y = $228551892029849628704214025041103992931522353829081057417499874057213204352
 Где:\\*
 p - характеристика простого поля, над которым определятся эллиптическая кривая; \\*
 a, b - параметры эллиптической кривой в форме Вейерштрасса (параметр $b$ в реализации не используется); \\*
-q - порядок подгруппы простого порядка группы точек эллиптической кривой; \\*
+q - порядок циклической подгруппы группы точек эллиптической кривой; \\*
 x, y - координаты порождающего элемента в краткой форме Вейерштрасса (в реализации обозначаются как x\_base, y\_base).\\
 \\*
 В документе значения параметров приведены в шестнадцатиричной системе счисления. Для перевода параметров в десятичную систему использовалась программа Wolfram Mathematica. Также, с помощью данной  программы были вычислена х-координата точки $(\theta, 0)$ второго порядка в форме Вейерштрасса (значение $\theta$): \\

@@ -2,7 +2,7 @@
 #include "tommath.h"
 #include "curve.h"
 
-int main()
+void Test()
 {
     // Инициализация параметров
     mp_int p, q, a, b, x_base, y_base, theta;
@@ -339,7 +339,7 @@ int main()
     printf("\n");
 
 
-    // Очиска памяти
+    // Очистка памяти
     ClearPoint(&P_base);
     ClearPoint(&E);
     ClearPoint(&SumPoint);
@@ -366,6 +366,11 @@ int main()
     mp_clear_multi(&k1, &k2, &k1k2, NULL);
     mp_clear_multi(&k1px, &k1py, &k1pz, NULL);
     mp_clear_multi(&k2px, &k2py, &k2pz, NULL);
+}
+
+int main()
+{
+    Test();
 
     return 0;
 }
