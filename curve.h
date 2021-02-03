@@ -112,13 +112,13 @@ void PrintPointAffine(struct Point * P, struct JacobiQuadric * JQ);
  * Основные функции
  */
 // Проверить находится ли данная точка на данной кривой
-bool IsPointOnCurve(struct Point * P, struct JacobiQuadric * JQ);
+int IsPointOnCurve(struct Point * P, struct JacobiQuadric * JQ);
 
 // Сложение двух точек P1 + P2, результат записывается в третью точку P3
 void Addition(struct Point * P1, struct Point * P2, struct Point * P3, struct JacobiQuadric * JQ);
 
 // Проверка равенства двух точек на кривой
-bool ArePointsEqual(struct Point * P1, struct Point * P2, struct JacobiQuadric * JQ);
+int ArePointsEqual(struct Point * P1, struct Point * P2, struct JacobiQuadric * JQ);
 
 // Реализация алгоритма "лесенка Монтгомери"
 void MontgomeryLadder(struct Point * P, mp_int * k, struct Point * Q, struct JacobiQuadric * JQ);

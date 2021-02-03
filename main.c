@@ -52,34 +52,34 @@ void Test()
 
 
     // ТЕСТИРОВАНИЕ //
-    bool ALL_TESTS_ARE_CORRECT = true;
+    int ALL_TESTS_ARE_CORRECT = 0;
 
     // ТЕСТ 1: ПРОВЕРКА ПРИНАДЛЕЖНОСТИ НЕЙТРАЛЬНОГО ЭЛЕМЕНТА
     printf("\nТЕСТ 1: ПРОВЕРКА ПРИНАДЛЕЖНОСТИ НЕЙТРАЛЬНОГО ЭЛЕМЕНТА\n");
     PrintPoint(&E);
     PrintPointAffine(&E, &Quadric);
-    if (IsPointOnCurve(&E, &Quadric))
+    if (IsPointOnCurve(&E, &Quadric) == 0)
     {
         printf("Нейтральный элемент Е принадлежит кривой\n");
     }
     else
     {
         printf("Нейтральный элемент Е не принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
 
     // ТЕСТ 2: ПОРОЖДАЮЩИЙ ЭЛЕМЕНТ В АФИННЫХ КООРДИНАТАХ
     printf("\nТЕСТ 2: ПОРОЖДАЮЩИЙ ЭЛЕМЕНТ В АФИННЫХ КООРДИНАТАХ\n");
     PrintPointAffine(&P_base, &Quadric);
-    if (IsPointOnCurve(&P_base, &Quadric))
+    if (IsPointOnCurve(&P_base, &Quadric) == 0)
     {
         printf("Порождающий элемент P_base принадлежит кривой\n");
     }
     else
     {
         printf("Порождающий элемент P_base не принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
 
@@ -93,24 +93,24 @@ void Test()
 
     PrintPoint(&SumPoint);
     PrintPointAffine(&SumPoint, &Quadric);
-    if (IsPointOnCurve(&SumPoint, &Quadric))
+    if (IsPointOnCurve(&SumPoint, &Quadric) == 0)
     {
         printf("Точка Е + P_base принадлежит кривой\n");
     }
     else
     {
         printf("Точка Е + P_base не принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
-    if (ArePointsEqual(&SumPoint, &P_base, &Quadric))
+    if (ArePointsEqual(&SumPoint, &P_base, &Quadric) == 0)
     {
         printf("Точки E+P_base и P_base равны\n");
     }
     else
     {
         printf("Точки E+P_base и P_base не равны\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
 
@@ -124,10 +124,10 @@ void Test()
     InitPoint(&P2, &p2x, &p2y, &p2z);
 
     PrintPointAffine(&P2, &Quadric);
-    if (IsPointOnCurve(&P2, &Quadric))
+    if (IsPointOnCurve(&P2, &Quadric) == 0)
     {
         printf("Точка (5 : 1 : 4) принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
     else
     {
@@ -145,14 +145,14 @@ void Test()
     MontgomeryLadder(&P_base, &ParamSet.q, &Q, &Quadric);
     PrintPoint(&Q);
     PrintPointAffine(&Q, &Quadric);
-    if (ArePointsEqual(&Q, &E, &Quadric))
+    if (ArePointsEqual(&Q, &E, &Quadric) == 0)
     {
         printf("Точки [q]P и E равны\n");
     }
     else
     {
         printf("Точки [q]P и E не равны\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
 
@@ -190,26 +190,26 @@ void Test()
 
     InitPoint(&minusP, &buf, &P_base.Y, &P_base.Z);
     PrintPointAffine(&minusP, &Quadric);
-    if (ArePointsEqual(&Q1, &minusP, &Quadric))
+    if (ArePointsEqual(&Q1, &minusP, &Quadric) == 0)
     {
         printf("Точки [q - 1]P и -P равны\n");
     }
     else
     {
         printf("Точки [q - 1]P и -P не равны\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
     PrintPointAffine(&Q2, &Quadric);
     PrintPointAffine(&P_base, &Quadric);
-    if (ArePointsEqual(&Q2, &P_base, &Quadric))
+    if (ArePointsEqual(&Q2, &P_base, &Quadric) == 0)
     {
         printf("Точки [q + 1]P и P равны\n");
     }
     else
     {
         printf("Точки [q + 1]P и P не равны\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
 
@@ -223,14 +223,14 @@ void Test()
     MontgomeryLadder(&P_base, &k, &kP, &Quadric);
 
     PrintPointAffine(&kP, &Quadric);
-    if (IsPointOnCurve(&kP, &Quadric))
+    if (IsPointOnCurve(&kP, &Quadric) == 0)
     {
         printf("Точка [k]P принадлежит кривой\n");
     }
     else
     {
         printf("Точка [k]P не принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
 
@@ -241,14 +241,14 @@ void Test()
     printf("k = %s\n", answer);
     MontgomeryLadder(&P_base, &k, &kP, &Quadric);
     PrintPointAffine(&kP, &Quadric);
-    if (IsPointOnCurve(&kP, &Quadric))
+    if (IsPointOnCurve(&kP, &Quadric) == 0)
     {
         printf("Точка [k]P принадлежит кривой\n");
     }
     else
     {
         printf("Точка [k]P не принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
 
@@ -276,14 +276,14 @@ void Test()
 
     MontgomeryLadder(&P_base, &k1, &k1P, &Quadric);
     PrintPointAffine(&k1P, &Quadric);
-    if (IsPointOnCurve(&k1P, &Quadric))
+    if (IsPointOnCurve(&k1P, &Quadric) == 0)
     {
         printf("Точка [k1]P принадлежит кривой\n");
     }
     else
     {
         printf("Точка [k1]P не принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
     struct Point k2P;
@@ -293,41 +293,41 @@ void Test()
 
     MontgomeryLadder(&P_base, &k2, &k2P, &Quadric);
     PrintPointAffine(&k2P, &Quadric);
-    if (IsPointOnCurve(&k2P, &Quadric))
+    if (IsPointOnCurve(&k2P, &Quadric) == 0)
     {
         printf("Точка [k2]P принадлежит кривой\n");
     }
     else
     {
         printf("Точка [k2]P не принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
     MontgomeryLadder(&P_base, &k1k2, &kP, &Quadric);
     PrintPointAffine(&kP, &Quadric);
-    if (IsPointOnCurve(&kP, &Quadric))
+    if (IsPointOnCurve(&kP, &Quadric) == 0)
     {
         printf("Точка [k1 + k2]P принадлежит кривой\n");
     }
     else
     {
         printf("Точка [k1 + k2]P не принадлежит кривой\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
     Addition(&k1P, &k2P, &k1P, &Quadric);
 
-    if (ArePointsEqual(&k1P, &kP, &Quadric))
+    if (ArePointsEqual(&k1P, &kP, &Quadric) == 0)
     {
         printf("Точки [k1]P + [k2]P и [k1 + k2]P равны\n");
     }
     else
     {
         printf("Точки [k1]P + [k2]P и [k1 + k2]P не равны\n");
-        ALL_TESTS_ARE_CORRECT = false;
+        ALL_TESTS_ARE_CORRECT = -1;
     }
 
-    if (ALL_TESTS_ARE_CORRECT)
+    if (ALL_TESTS_ARE_CORRECT == 0)
     {
         printf("\nВСЕ ТЕСТЫ УСПЕШНО ПРОЙДЕНЫ\n");
     }

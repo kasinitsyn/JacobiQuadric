@@ -222,11 +222,11 @@ void PrintPointAffine(struct Point * P, struct JacobiQuadric * JQ)
  * Основные функции
  */
 // Проверить находится ли данная точка на данной кривой
-bool IsPointOnCurve(struct Point * P, struct JacobiQuadric * JQ)
+int IsPointOnCurve(struct Point * P, struct JacobiQuadric * JQ)
 {
     mp_int buf1, buf2, buf3;
     mp_init_multi(&buf2, &buf3, NULL);
-    bool IsOnCurve;
+    int IsOnCurve;
 
     /* Для проверки нахождения точки на кривой подставляем её коориднаты (X : Y: Z)
      * в уравение кривой Y ^ 2 == e * X^4 - 2 * d * X^2 * Y^2 + Z^4              */
@@ -253,11 +253,11 @@ bool IsPointOnCurve(struct Point * P, struct JacobiQuadric * JQ)
 
     if (mp_cmp(&buf2, &buf3) == MP_EQ)
     {
-        IsOnCurve = true;
+        IsOnCurve = 0;
     }
     else
     {
-        IsOnCurve = false;
+        IsOnCurve = -1;
     }
 
     mp_clear_multi(&buf1, &buf2, &buf3, NULL);
@@ -320,7 +320,7 @@ void Addition(struct Point * P1, struct Point * P2, struct Point * P3, struct Ja
 
 
 // Проверка равенства двух точек на кривой
-bool ArePointsEqual(struct Point * P1, struct Point * P2, struct JacobiQuadric * JQ)
+int ArePointsEqual(struct Point * P1, struct Point * P2, struct JacobiQuadric * JQ)
 {
     mp_int x1, y1, x2, y2, buf;
     mp_init_multi(&x1, &y1, &x2, &y2, &buf, NULL);
@@ -346,12 +346,12 @@ bool ArePointsEqual(struct Point * P1, struct Point * P2, struct JacobiQuadric *
     if ((mp_cmp(&x1, &x2) == MP_EQ) && (mp_cmp(&y1, &y2) == MP_EQ))
     {
         mp_clear_multi(&x1, &y1, &x2, &y2, &buf, NULL);
-        return true;
+        return 0;
     }
     else
     {
         mp_clear_multi(&x1, &y1, &x2, &y2, &buf, NULL);
-        return false;
+        return -1;
     }
 }
 
