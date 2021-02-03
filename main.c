@@ -236,8 +236,8 @@ void Test()
 
     // ТЕСТ 8: Вычисление [k]P для случайного k из диапазона [0, q)
     printf("\nТЕСТ 8: Вычисление [k]P для случайного k из диапазона [0, q)\n");
-    mp_prime_rand(&k, 1, 200, NULL);
-    mp_to_radix(&k, &answer, 250, NULL, 10);
+    mp_prime_rand(&k, 1, 200, 0); ///                                                !!! WARNING !!!                                      ///
+    mp_to_radix(&k, answer, 250, NULL, 10); ///                                                !!! WARNING !!!                                      ///
     printf("k = %s\n", answer);
     MontgomeryLadder(&P_base, &k, &kP, &Quadric);
     PrintPointAffine(&kP, &Quadric);
@@ -257,16 +257,16 @@ void Test()
     mp_int k1, k2, k1k2;
     mp_init_multi(&k1, &k2, &k1k2, NULL);
 
-    mp_prime_rand(&k1, 1, 100, NULL);
-    mp_to_radix(&k1, &answer, 250, NULL, 10);
+    mp_prime_rand(&k1, 1, 100, 0); ///                                                !!! WARNING !!!                                      ///
+    mp_to_radix(&k1, answer, 250, NULL, 10); ///                                                !!! WARNING !!!                                      ///
     printf("k1 = %s\n", answer);
 
-    mp_prime_rand(&k2, 1, 100, NULL);
-    mp_to_radix(&k2, &answer, 250, NULL, 10);
+    mp_prime_rand(&k2, 1, 100, 0); ///                                                !!! WARNING !!!                                      ///
+    mp_to_radix(&k2, answer, 250, NULL, 10); ///                                                !!! WARNING !!!                                      ///
     printf("k2 = %s\n", answer);
 
     mp_add(&k1, &k2, &k1k2);
-    mp_to_radix(&k1k2, &answer, 250, NULL, 10);
+    mp_to_radix(&k1k2, answer, 250, NULL, 10); ///                                                !!! WARNING !!!                                      ///
     printf("k1 + k2 = %s\n", answer);
 
     struct Point k1P;
