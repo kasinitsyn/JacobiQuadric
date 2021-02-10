@@ -56,21 +56,6 @@ struct JacobiQuadric
     mp_int Z;
 };
 
-/*
- * Дополнительные функции, обеспечивающие арифметику по модулю
-*/
-// Находит сумму а + b по модулю mod и помещает результат в с
-void mp_add_mod(mp_int * a, mp_int * b, mp_int * c, mp_int * mod);
-
-// Находит разность а - b по модулю mod и помещает результат в с
-void mp_sub_mod(mp_int * a, mp_int * b, mp_int * c, mp_int * mod);
-
-// Находит произведение а * b по модулю mod и помещает результат в с
-void mp_mul_mod(mp_int * a, mp_int * b, mp_int * c, mp_int * mod);
-
-// Считает -а по модулю mod и помещает результат в b
-void mp_neg_mod(mp_int * a, mp_int * b, mp_int * mod);
-
 
 /*
  * Функции инициализации основных структур

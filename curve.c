@@ -1,52 +1,6 @@
 #include "tommath.h"
 #include "curve.h"
 
-/*
- * Дополнительные функции, обеспечивающие арифметику по модулю
- */
-// Находит сумму а + b по модулю mod и помещает результат в с
-void mp_add_mod(mp_int * a, mp_int * b, mp_int * c, mp_int * mod)
-{
-    mp_add(a, b, c);
-    mp_div(c, mod, NULL, c);
-}
-
-// Находит разность а - b по модулю mod и помещает результат в с
-void mp_sub_mod(mp_int * a, mp_int * b, mp_int * c, mp_int * mod)
-{
-    mp_sub(a, b, c);
-    mp_int ZERO;
-    mp_init_set(&ZERO, 0);
-
-    if (mp_cmp(c, &ZERO) == MP_GT)
-    {
-        // c > 0
-        mp_div(c, mod, NULL, c);
-    }
-    else
-    {
-        // c <= 0
-        mp_add(c, mod, c);
-        mp_div(c, mod, NULL, c);
-    }
-
-    mp_clear(&ZERO);
-}
-
-// Находит произведение а * b по модулю mod и помещает результат в с
-void mp_mul_mod(mp_int * a, mp_int * b, mp_int * c, mp_int * mod)
-{
-    mp_mul(a, b, c);
-    mp_div(c, mod, NULL, c);
-}
-
-// Считает -а по модулю mod и помещает результат в b
-void mp_neg_mod(mp_int * a, mp_int * b, mp_int * mod)
-{
-    mp_neg(a, b);
-    mp_add(b, mod, b);
-}
-
 
 /*
  * Функции инициализации основных структур
@@ -87,50 +41,50 @@ void InitJacobiQuadric(struct JacobiQuadric * JQ, struct Parameters * Param)
     mp_int buf1, buf2;
 
     mp_init_set(&buf1, 3);                               // 3 in buf1
-    mp_mul_mod(&buf1, &Param->theta, &buf1, &Param->p);  // 3 * theta in buf1
+    mp_mulmod(&buf1, &Param->theta, &Param->p, &buf1);   // 3 * theta in buf1
     mp_init_set(&buf2, 4);                               // 4 in buf2
     mp_invmod(&buf2, &Param->p, &buf2);                  // 1/4 in buf2
-    mp_mul_mod(&buf1, &buf2, &JQ->d, &Param->p);         // 3 * theta / 4 in JQ->d
+    mp_mulmod(&buf1, &buf2, &Param->p, &JQ->d);          // 3 * theta / 4 in JQ->d
 
 
     /*  Считаем параметр e = -(3*theta^2 + 4 * a) / 16  */
-    mp_mul_mod(&Param->theta, &Param->theta, &buf1, &Param->p); // theta^2 in buf1
+    mp_mulmod(&Param->theta, &Param->theta, &Param->p, &buf1);  // theta^2 in buf1
     mp_clear(&buf2);                                            // clear buf2
     mp_init_set(&buf2, 3);                                      // 3 in buf2
-    mp_mul_mod(&buf2, &buf1, &buf1, &Param->p);                 // 3 * theta^2 in buf1
+    mp_mulmod(&buf2, &buf1, &Param->p, &buf1);                  // 3 * theta^2 in buf1
 
     mp_clear(&buf2);                                            // clear buf2
     mp_init_set(&buf2, 4);                                      // 4 in buf2
-    mp_mul_mod(&buf2, &Param->a, &buf2, &Param->p);             // 4 * a in buf2
-    mp_add_mod(&buf1, &buf2, &buf1, &Param->p);                 // 3 * theta^2 + 4 * a in buf1
-
-    mp_neg_mod(&buf1, &buf1, &Param->p);                        // -(3 * theta^2 + 4 * a) in buf1
+    mp_mulmod(&buf2, &Param->a, &Param->p, &buf2);              // 4 * a in buf2
+    mp_addmod(&buf1, &buf2, &Param->p, &buf1);                  // 3 * theta^2 + 4 * a in buf1
+    mp_neg(&buf1, &buf1);                                       // -(3 * theta^2 + 4 * a) in buf1
+    mp_add(&buf1, &Param->p, &buf1);                            // -(3 * theta^2 + 4 * a) mod p in buf1
     mp_clear(&buf2);                                            // clear buf2
     mp_init_set(&buf2, 16);                                     // 16 in buf2
     mp_invmod(&buf2, &Param->p, &buf2);                         // 1/16 in buf2
-    mp_mul_mod(&buf1, &buf2, &JQ->e, &Param->p);                // -(3 * theta^2 + 4 * a) / 16 in JQ->e
+    mp_mulmod(&buf1, &buf2, &Param->p, &JQ->e);                 // -(3 * theta^2 + 4 * a) / 16 in JQ->e
 
 
     /*      Считаем координаты порождающего элемента в проективных координатах      */
     /* Координата X = 2 * (x_base - theta) */
     mp_clear(&buf1);                                                // clear buf1
     mp_init_set(&buf1, 2);                                          // 2 in buf1
-    mp_sub_mod(&Param->x_base, &Param->theta, &buf2, &Param->p);    // (x_base - theta) in buf2
-    mp_mul_mod(&buf1, &buf2, &JQ->X, &Param->p);                    // 2 * (x_base - theta) in JQ->X
+    mp_submod(&Param->x_base, &Param->theta, &Param->p, &buf2);     // (x_base - theta) in buf2
+    mp_mulmod(&buf1, &buf2, &Param->p, &JQ->X);                     // 2 * (x_base - theta) in JQ->X
 
 
     /* Координата Y = (2 * x_base + theta) * (x_base - theta)^2 - y_base^2 */
     mp_clear(&buf1);                                               // clear buf1
     mp_init_set(&buf1, 2);                                         // 2 in buf1
-    mp_mul_mod(&buf1, &Param->x_base, &buf1, &Param->p);           // 2 * x_base in buf1
-    mp_add_mod(&buf1, &Param->theta, &buf1, &Param->p);            // 2 * x_base + theta in buf1
+    mp_mulmod(&buf1, &Param->x_base, &Param->p, &buf1);            // 2 * x_base in buf1
+    mp_addmod(&buf1, &Param->theta, &Param->p, &buf1);             // 2 * x_base + theta in buf1
 
-    mp_sub_mod(&Param->x_base, &Param->theta, &buf2, &Param->p);   // x_base - theta in buf2
-    mp_mul_mod(&buf2, &buf2, &buf2, &Param->p);                    // (x_base - theta)^2 in buf2
-    mp_mul_mod(&buf1, &buf2, &buf1, &Param->p);                    // (2 * x_base + theta) * (x_base - theta)^2 in buf1
+    mp_submod(&Param->x_base, &Param->theta, &Param->p, &buf2);    // x_base - theta in buf2
+    mp_mulmod(&buf2, &buf2, &Param->p, &buf2);                     // (x_base - theta)^2 in buf2
+    mp_mulmod(&buf1, &buf2, &Param->p, &buf1);                     // (2 * x_base + theta) * (x_base - theta)^2 in buf1
 
-    mp_mul_mod(&Param->y_base, &Param->y_base, &buf2, &Param->p);  // y_base^2 in buf2
-    mp_sub_mod(&buf1, &buf2, &JQ->Y, &Param->p);                   // (2 * x_base + theta) * (x_base - theta)^2 - y_base^2 in JQ->Y
+    mp_mulmod(&Param->y_base, &Param->y_base, &Param->p, &buf2);   // y_base^2 in buf2
+    mp_submod(&buf1, &buf2, &Param->p, &JQ->Y);                    // (2 * x_base + theta) * (x_base - theta)^2 - y_base^2 in JQ->Y
 
     mp_clear_multi(&buf1, &buf2, NULL);                            // очистка переменных - буферов
 
@@ -169,20 +123,15 @@ void ClearJacobiQuadric(struct JacobiQuadric * JQ)
 void PrintPoint(struct Point * P)
 {
     printf("Точка в проективных координатах:\n");
-    size_t size_x, size_y, size_z;
+    int out_size = 250;
+    char out[out_size];
 
-    mp_radix_size(&P->X, 10, &size_x);
-    mp_radix_size(&P->Y, 10, &size_y);
-    mp_radix_size(&P->Z, 10, &size_z);
-
-    char x_str[size_x], y_str[size_y], z_str[size_z];
-
-    mp_to_radix(&P->X, x_str, size_x, NULL, 10);
-    printf("X = %s\n", x_str);
-    mp_to_radix(&P->Y, y_str, size_y, NULL, 10);
-    printf("Y = %s\n", y_str);
-    mp_to_radix(&P->Z, z_str, size_z, NULL, 10);
-    printf("Z = %s\n", z_str);
+    mp_to_radix(&P->X, out, out_size, NULL, 10);
+    printf("X = %s\n", out);
+    mp_to_radix(&P->Y, out, out_size, NULL, 10);
+    printf("Y = %s\n", out);
+    mp_to_radix(&P->Z, out, out_size, NULL, 10);
+    printf("Z = %s\n", out);
 }
 
 // Вывести значения афинных координат точки на экран
@@ -195,24 +144,20 @@ void PrintPointAffine(struct Point * P, struct JacobiQuadric * JQ)
 
     /* x = X / Z */
     mp_invmod(&P->Z, &JQ->p, &buf);         // 1 / Z in buf
-    mp_mul_mod(&P->X, &buf, &x, &JQ->p);    // X / Z in x
+    mp_mulmod(&P->X, &buf, &JQ->p, &x);     // X / Z in x
 
     /* y = Y / Z^2 */
-    mp_mul_mod(&buf, &buf, &buf, &JQ->p);   // 1 / Z^2 in buf
-    mp_mul_mod(&P->Y, &buf, &y, &JQ->p);    // Y / Z^2 in y
+    mp_mulmod(&buf, &buf, &JQ->p, &buf);    // 1 / Z^2 in buf
+    mp_mulmod(&P->Y, &buf, &JQ->p, &y);     // Y / Z^2 in y
 
     printf("Точка в афинных координатах:\n");
-    size_t size_x, size_y;
+    int out_size = 250;
+    char out[out_size];
 
-    mp_radix_size(&x, 10, &size_x);
-    mp_radix_size(&y, 10, &size_y);;
-
-    char x_str[size_x], y_str[size_y];
-
-    mp_to_radix(&x, x_str, size_x, NULL, 10);
-    printf("x = %s\n", x_str);
-    mp_to_radix(&y, y_str, size_y, NULL, 10);
-    printf("y = %s\n", y_str);
+    mp_to_radix(&x, out, out_size, NULL, 10);
+    printf("x = %s\n", out);
+    mp_to_radix(&y, out, out_size, NULL, 10);
+    printf("y = %s\n", out);
 
     mp_clear_multi(&x, &y, &buf, NULL);
 }
@@ -233,19 +178,19 @@ int IsPointOnCurve(struct Point * P, struct JacobiQuadric * JQ)
     mp_init_set(&buf1, 2);                      // 2 in buf1
     mp_exptmod(&P->X, &buf1, &JQ->p, &buf2);    // X^2 in buf2
     mp_exptmod(&P->Z, &buf1, &JQ->p, &buf3);    // Z^2 in buf3
-    mp_mul_mod(&buf2, &buf3, &buf3, &JQ->p);    // X^2 * Z^2 in buf3
-    mp_mul_mod(&buf1, &JQ->d, &buf1, &JQ->p);   // 2 * d in buf1
-    mp_mul_mod(&buf1, &buf3, &buf3, &JQ->p);    // X^2 * Z^2 * 2 * d in buf3
+    mp_mulmod(&buf2, &buf3, &JQ->p, &buf3);     // X^2 * Z^2 in buf3
+    mp_mulmod(&buf1, &JQ->d, &JQ->p, &buf1);    // 2 * d in buf1
+    mp_mulmod(&buf1, &buf3, &JQ->p, &buf3);     // X^2 * Z^2 * 2 * d in buf3
 
     mp_clear(&buf1);                            // clear buf1
     mp_init_set(&buf1, 4);                      // 4 in buf1
     mp_exptmod(&P->X, &buf1, &JQ->p, &buf2);    // X^4 in buf2
-    mp_mul_mod(&buf2, &JQ->e, &buf2, &JQ->p);   // e * X^4 in buf2
+    mp_mulmod(&buf2, &JQ->e, &JQ->p, &buf2);    // e * X^4 in buf2
 
-    mp_sub_mod(&buf2, &buf3, &buf3, &JQ->p);    // e * X^4 - X^2 * Y^2 * 2 * d in buf3
+    mp_submod(&buf2, &buf3, &JQ->p, &buf3);     // e * X^4 - X^2 * Y^2 * 2 * d in buf3
 
     mp_exptmod(&P->Z, &buf1, &JQ->p, &buf2);    // Z^4 in buf2
-    mp_add_mod(&buf3, &buf2, &buf3, &JQ->p);    // e * X^4 - 2 * d * X^2 * Y^2 + Z^4 in buf3
+    mp_addmod(&buf3, &buf2, &JQ->p, &buf3);     // e * X^4 - 2 * d * X^2 * Y^2 + Z^4 in buf3
 
     mp_clear(&buf1);                            // clear buf1
     mp_init_set(&buf1, 2);                      // 2 in buf1
@@ -279,36 +224,36 @@ void Addition(struct Point * P1, struct Point * P2, struct Point * P3, struct Ja
     mp_init_copy(&T5, &P2->Y);              // T5 = Y2
     mp_init_copy(&T6, &P2->Z);              // T6 = Z6
 
-    mp_mul_mod(&T1, &T3, &T7, &JQ->p);      // T7 = T1 * T3
-    mp_add_mod(&T2, &T7, &T7, &JQ->p);      // T7 = T2 + T7
-    mp_mul_mod(&T4, &T6, &T8, &JQ->p);      // T8 = T4 * T6
-    mp_add_mod(&T5, &T8, &T8, &JQ->p);      // T8 = T5 + T8
-    mp_mul_mod(&T2, &T5, &T2, &JQ->p);      // T2 = T2 * T5
-    mp_mul_mod(&T7, &T8, &T7, &JQ->p);      // T7 = T7 * T8
-    mp_sub_mod(&T7, &T2, &T7, &JQ->p);      // T7 = T7 - T2
-    mp_mul_mod(&T1, &T4, &T5, &JQ->p);      // T5 = T1 * T4
-    mp_add_mod(&T1, &T3, &T1, &JQ->p);      // T1 = T1 + T3
-    mp_mul_mod(&T3, &T6, &T8, &JQ->p);      // T8 = T3 * T6
-    mp_add_mod(&T4, &T6, &T4, &JQ->p);      // T4 = T4 + T6
-    mp_mul_mod(&T5, &T8, &T6, &JQ->p);      // T6 = T5 * T8
-    mp_sub_mod(&T7, &T6, &T7, &JQ->p);      // T7 = T7 - T6
-    mp_mul_mod(&T1, &T4, &T1, &JQ->p);      // T1 = T1 * T4
-    mp_sub_mod(&T1, &T5, &T1, &JQ->p);      // T1 = T1 - T5
-    mp_sub_mod(&T1, &T8, &T1, &JQ->p);      // T1 = T1 - T8
-    mp_mul_mod(&T1, &T1, &T3, &JQ->p);      // T3 = T1 * T1
-    mp_add_mod(&T6, &T6, &T6, &JQ->p);      // T6 = T6 + T6
-    mp_sub_mod(&T3, &T6, &T3, &JQ->p);      // T3 = T3 - T6
-    mp_mul_mod(&JQ->e, &T6, &T4, &JQ->p);   // T4 = e * T6
-    mp_mul_mod(&T3, &T4, &T3, &JQ->p);      // T3 = T3 * T4
-    mp_mul_mod(&JQ->d, &T6, &T4, &JQ->p);   // T4 = d * T6
-    mp_sub_mod(&T2, &T4, &T2, &JQ->p);      // T2 = T2 - T4
-    mp_mul_mod(&T8, &T8, &T4, &JQ->p);      // T4 = T8 * T8
-    mp_mul_mod(&T5, &T5, &T8, &JQ->p);      // T8 = T5 * T5
-    mp_mul_mod(&JQ->e, &T8, &T8, &JQ->p);   // T8 = e * T8
-    mp_add_mod(&T4, &T8, &T5, &JQ->p);      // T5 = T4 + T8
-    mp_mul_mod(&T2, &T5, &T2, &JQ->p);      // T2 = T2 * T5
-    mp_add_mod(&T2, &T3, &T2, &JQ->p);      // T2 = T2 + T3
-    mp_sub_mod(&T4, &T8, &T5, &JQ->p);      // T5 = T4 - T8
+    mp_mulmod(&T1, &T3, &JQ->p, &T7);       // T7 = T1 * T3
+    mp_addmod(&T2, &T7, &JQ->p, &T7);       // T7 = T2 + T7
+    mp_mulmod(&T4, &T6, &JQ->p, &T8);       // T8 = T4 * T6
+    mp_addmod(&T5, &T8, &JQ->p, &T8);       // T8 = T5 + T8
+    mp_mulmod(&T2, &T5, &JQ->p, &T2);       // T2 = T2 * T5
+    mp_mulmod(&T7, &T8, &JQ->p, &T7);       // T7 = T7 * T8
+    mp_submod(&T7, &T2, &JQ->p, &T7);       // T7 = T7 - T2
+    mp_mulmod(&T1, &T4, &JQ->p, &T5);       // T5 = T1 * T4
+    mp_addmod(&T1, &T3, &JQ->p, &T1);       // T1 = T1 + T3
+    mp_mulmod(&T3, &T6, &JQ->p, &T8);       // T8 = T3 * T6
+    mp_addmod(&T4, &T6, &JQ->p, &T4);       // T4 = T4 + T6
+    mp_mulmod(&T5, &T8, &JQ->p, &T6);       // T6 = T5 * T8
+    mp_submod(&T7, &T6, &JQ->p, &T7);       // T7 = T7 - T6
+    mp_mulmod(&T1, &T4, &JQ->p, &T1);       // T1 = T1 * T4
+    mp_submod(&T1, &T5, &JQ->p, &T1);       // T1 = T1 - T5
+    mp_submod(&T1, &T8, &JQ->p, &T1);       // T1 = T1 - T8
+    mp_mulmod(&T1, &T1, &JQ->p, &T3);       // T3 = T1 * T1
+    mp_addmod(&T6, &T6, &JQ->p, &T6);       // T6 = T6 + T6
+    mp_submod(&T3, &T6, &JQ->p, &T3);       // T3 = T3 - T6
+    mp_mulmod(&JQ->e, &T6, &JQ->p, &T4);    // T4 = e * T6
+    mp_mulmod(&T3, &T4, &JQ->p, &T3);       // T3 = T3 * T4
+    mp_mulmod(&JQ->d, &T6, &JQ->p, &T4);    // T4 = d * T6
+    mp_submod(&T2, &T4, &JQ->p, &T2);       // T2 = T2 - T4
+    mp_mulmod(&T8, &T8, &JQ->p, &T4);       // T4 = T8 * T8
+    mp_mulmod(&T5, &T5, &JQ->p, &T8);       // T8 = T5 * T5
+    mp_mulmod(&JQ->e, &T8, &JQ->p, &T8);    // T8 = e * T8
+    mp_addmod(&T4, &T8, &JQ->p, &T5);       // T5 = T4 + T8
+    mp_mulmod(&T2, &T5, &JQ->p, &T2);       // T2 = T2 * T5
+    mp_addmod(&T2, &T3, &JQ->p, &T2);       // T2 = T2 + T3
+    mp_submod(&T4, &T8, &JQ->p, &T5);       // T5 = T4 - T8
 
     mp_clear_multi(&P3->X, &P3->Y, &P3->Z, NULL);
     mp_init_copy(&P3->X, &T7);              // X3 = T7
@@ -328,21 +273,22 @@ int ArePointsEqual(struct Point * P1, struct Point * P2, struct JacobiQuadric * 
     /*  Перевод первой точки в афинные координаты   */
     /* x = X / Z */
     mp_invmod(&P1->Z, &JQ->p, &buf);          // 1 / Z in buf
-    mp_mul_mod(&P1->X, &buf, &x1, &JQ->p);    // X / Z in x1
+    mp_mulmod(&P1->X, &buf, &JQ->p, &x1);     // X / Z in x1
 
     /* y = Y / Z^2 */
-    mp_mul_mod(&buf, &buf, &buf, &JQ->p);     // 1 / Z^2 in buf
-    mp_mul_mod(&P1->Y, &buf, &y1, &JQ->p);    // Y / Z^2 in y1
+    mp_mulmod(&buf, &buf, &JQ->p, &buf);      // 1 / Z^2 in buf
+    mp_mulmod(&P1->Y, &buf, &JQ->p, &y1);     // Y / Z^2 in y1
 
     /*  Перевод второй точки в афинные координаты   */
     /* x = X / Z */
     mp_invmod(&P2->Z, &JQ->p, &buf);          // 1 / Z in buf
-    mp_mul_mod(&P2->X, &buf, &x2, &JQ->p);    // X / Z in x2
+    mp_mulmod(&P2->X, &buf, &JQ->p, &x2);     // X / Z in x2
 
     /* y = Y / Z^2 */
-    mp_mul_mod(&buf, &buf, &buf, &JQ->p);     // 1 / Z^2 in buf
-    mp_mul_mod(&P2->Y, &buf, &y2, &JQ->p);    // Y / Z^2 in y1
+    mp_mulmod(&buf, &buf, &JQ->p, &buf);     // 1 / Z^2 in buf
+    mp_mulmod(&P2->Y, &buf, &JQ->p, &y2);    // Y / Z^2 in y2
 
+    /*  Сравнение точек в афинных координатах   */
     if ((mp_cmp(&x1, &x2) == MP_EQ) && (mp_cmp(&y1, &y2) == MP_EQ))
     {
         mp_clear_multi(&x1, &y1, &x2, &y2, &buf, NULL);
@@ -375,16 +321,13 @@ void MontgomeryLadder(struct Point * P, mp_int * k, struct Point * RES, struct J
     mp_init_copy(&rz, &P->Z);
     InitPoint(&R, &rx, &ry, &rz);
 
-    size_t n;
-    mp_radix_size(k, 2, &n);
-    char bin_k[n];
-    mp_to_radix(k, bin_k, n, NULL, 2);
+    int n = mp_count_bits(k);
 
     // Лесенка Монтгомери
     int i = 0;
-    for (i = 0; i < n - 1; i++)
+    for (i = 0; i < n; i++)
     {
-        if (bin_k[i] == '1')
+        if (mp_get_bit(k, n - i - 1) == 1)
         {
             Addition(&R, &Q, &Q, JQ);   // Q = R + Q
             Addition(&R, &R, &R, JQ);   // R = R + R

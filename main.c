@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "tommath.h"
+#include <tommath.h>
 #include "curve.h"
 
 void Test()
@@ -186,7 +186,8 @@ void Test()
     struct Point minusP;
     mp_clear(&buf);
     mp_init_copy(&buf, &P_base.X);
-    mp_neg_mod(&buf, &buf, &Quadric.p);
+    mp_neg(&buf, &buf);
+    mp_add(&buf, &Quadric.p, &buf);
 
     InitPoint(&minusP, &buf, &P_base.Y, &P_base.Z);
     PrintPointAffine(&minusP, &Quadric);
@@ -236,7 +237,7 @@ void Test()
 
     // ТЕСТ 8: Вычисление [k]P для случайного k из диапазона [0, q)
     printf("\nТЕСТ 8: Вычисление [k]P для случайного k из диапазона [0, q)\n");
-    mp_prime_rand(&k, 1, 200, 0);
+    mp_rand(&k, 3);
     mp_to_radix(&k, answer, 250, NULL, 10);
     printf("k = %s\n", answer);
     MontgomeryLadder(&P_base, &k, &kP, &Quadric);
@@ -257,11 +258,11 @@ void Test()
     mp_int k1, k2, k1k2;
     mp_init_multi(&k1, &k2, &k1k2, NULL);
 
-    mp_prime_rand(&k1, 1, 100, 0);
+    mp_rand(&k1, 3);
     mp_to_radix(&k1, answer, 250, NULL, 10);
     printf("k1 = %s\n", answer);
 
-    mp_prime_rand(&k2, 1, 100, 0);
+    mp_rand(&k2, 3);
     mp_to_radix(&k2, answer, 250, NULL, 10);
     printf("k2 = %s\n", answer);
 
