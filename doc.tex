@@ -228,7 +228,11 @@ $X_3 \leftarrow T_7; Y_3 \leftarrow T_2; Z_3 \leftarrow T_5$
 \\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_add}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c)} - записывает в \texttt{c} результат суммы \texttt{a + b}.\\
 \\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_addmod}}\texttt{(const mp\_int * a, const mp\_int * b, const mp\_int * c, mp\_int * d)} - записывает в \texttt{d} результат сложения \texttt{a + b} по модулю \texttt{c}. \\
+\\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_sub}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c)} - записывает в \texttt{с} результат разности \texttt{a - b}.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_submod}}\texttt{(const mp\_int * a, const mp\_int * b, const mp\_int * c, mp\_int * d)} - записывает в \texttt{d} результат разности \texttt{a - b} по модулю \texttt{c}. \\
 \\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_neg}}\texttt{(mp\_int * a, mp\_int * b)} - записывает в \texttt{b} значение \texttt{a} с противоположным знаком (\texttt{-a}).\\
 \\*
@@ -236,15 +240,19 @@ $X_3 \leftarrow T_7; Y_3 \leftarrow T_2; Z_3 \leftarrow T_5$
 \\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_mul}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c)} - помещает результат умножения \texttt{a} на \texttt{b} в \texttt{c}.\\
 \\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_mulmod}}\texttt{(const mp\_int * a, const mp\_int * b, const mp\_int * c, mp\_int * d)} - записывает в \texttt{d} результат произведения \texttt{a $\cdot$ b} по модулю \texttt{c}. \\
+\\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_exptmod}}\texttt{(mp\_int * G, mp\_int * X, mp\_int * P, mp\_int * Y)} - возводит \texttt{G} в степень \texttt{Х} и помещает результат по модулю \texttt{Р} в \texttt{Y} (\texttt{$Y \equiv G X (mod P)$}).\\
 \\*
 \textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_to\_radix}}\texttt{(const mp\_int * a, char * str, size\_t maxlen, size\_t * written, int radix)} - помещает \texttt{mp\_int a} в строковом виде в \texttt{char str}. В \texttt{radix} указывается основание системы счисления (от 2 до 64), в \texttt{size\_t maxlen} - максимальный размер, который может занять число в \texttt{char str}, в \texttt{size\_t written} помещается размер реально записанного в \texttt{char str} числа.\\
 \\*
-\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_radix\_size}}\texttt{(mp\_int * a, int radix, int *size)} - помещает в \texttt{size} целое число – размер, необходимый для помещения \texttt{mp\_int а} в char. В \texttt{radix} указывается основание системы счисления (от 2 до 64). \\
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_read\_radix}}\texttt{(mp\_int * a, char * str, int radix)} - считывает число в строковом виде из \texttt{char str} и помещает в \texttt{mp\_int a}. В \texttt{radix} указывается основание системы счисления (от 2 до 64).\\
 \\*
-\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_read\_radix}}\texttt{(mp\_int * a, char *str, int radix)} - считывает число в строковом виде из \texttt{char str} и помещает в \texttt{mp\_int a}. В \texttt{radix} указывается основание системы счисления (от 2 до 64).\\
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_count\_bits}}\texttt{(const mp\_int * a)} - возвращает количество бит в числе \texttt{mp\_int a}.\\
 \\*
-\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_prime\_random}}\texttt{(mp\_int * a, int t, int size, int bbs, ltm\_prime\_callback cb, void * dat)} - генерирует случайное простое число, превышающее $256^{size}$ и помещает его в \texttt{mp\_int a}. При этом число должно пройти \texttt{t} тестов. В аргументах \texttt{int bbs, ltm\_prime\_callback cb, void * dat} указываются дополнительные флаги (не используется). Данная функция используется в программе для генерации случайного числа, поскольку библиотека Libtommath не содержит функций для генерации случайных чисел.\\ 
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_get\_bit}}\texttt{(mp\_int * a, int b)} - возвращает значение бита на позиции \texttt{b} числа \texttt{mp\_int a}.\\
+\\*
+\textcolor{red}{\texttt{int}} \textcolor{blue}{\texttt{mp\_rand}}\texttt{(mp\_int * a, int digits)} - генерирует случайное большое число размером \texttt{digits} бит и помещает его в \texttt{a}.\\
 \\*
 
 
@@ -293,17 +301,6 @@ struct JacobiQuadric
 };
 \end{lstlisting} 
 \subsection{Основные функции}
-\subsubsection{Функции, обеспечивающие арифметику по модулю числа}
-В виду отсутствия в библиотеке Libtommath необходимых для математики эллиптических кривых функций, осуществляющих арифметику по модулю числа, в ходе выполнения данной работы были написаны соответствующие функции. Функции стилистически оформлены как функции библиотеки.\\
-\\*
-\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_add\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c, mp\_int * mod)} - записывает в \texttt{c} результат суммы \texttt{a + b} по модулю числа \texttt{p}.\\
-\\*
-\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_sub\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c, mp\_int * mod)} - записывает в \texttt{c} результат разности \texttt{a - b} по модулю числа \texttt{p}.\\
-\\*
-\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_mul\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * c, mp\_int * mod)} - записывает в \texttt{c} результат произведения \texttt{a * b} по модулю числа \texttt{p}.\\
-\\*
-\textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{mp\_neg\_mod}}\texttt{(mp\_int * a, mp\_int * b, mp\_int * mod)} - записывает в \texttt{b} значение \texttt{a} с противоположным знаком (\texttt{-a}) по по модулю числа \texttt{p}.\\
-
 \subsubsection{Функции инициализации основных структур}
 \textcolor{red}{\texttt{void}} \textcolor{blue}{\texttt{InitPoint}}\texttt{(struct Point * P, mp\_int * x, mp\_int * y, mp\_int * z)} - инициализация точки \texttt{P} с проективными координатами \texttt{x, y, z}.\\
 \\*
@@ -336,7 +333,7 @@ struct JacobiQuadric
 
 \section{Тестирование}
 \subsection{Установка и запуск реализации}
-Для установки библиотеки Libtommath следует воспользоваться официальной инструкцией по установке, приведенной в документации к библиотеке \url{https://github.com/libtom/libtommath}. \\
+Для установки библиотеки Libtommath следует воспользоваться официальной инструкцией по установке, приведенной в документации к библиотеке. Библиотеку с необходимой документацией можно найти на официальном сайте по следующей ссылке \url{https://www.libtom.net}. \\
 \\*
 Для установки и запуска реализации следует выполнить следующие команды в командной строке из папки с проектом:
 \begin{enumerate}
@@ -499,7 +496,7 @@ y = 8496696261376140439386072717180541178274471110232069098869998588882890716063
 analysis, proceedings of AAECC-15, Lecture Notes in Computer Science» \url{https://eprint.iacr.org/2002/125.pdf};
 \item «Рекомендации по стандартизации. Параметры эллиптических кривых
 для криптографических алгоритмов и протоколов. Р 50.1.114 – 2016»;
-\item Документация библиотеки libtommath «LibTomMath User Manual» \url{https://github.com/libtom/libtommath}.
+\item Документация библиотеки libtommath «LibTomMath User Manual» \url{https://www.libtom.net}.
 \end{enumerate}
 
 
